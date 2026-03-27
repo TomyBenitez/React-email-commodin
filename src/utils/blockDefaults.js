@@ -27,6 +27,8 @@ const DEFAULT_PROPS = {
     width: '100%',
     align: 'center',
     linkUrl: '',
+    borderRadius: 0,
+    objectFit: 'fill',
   },
   button: {
     text: 'Hacer click aquí',

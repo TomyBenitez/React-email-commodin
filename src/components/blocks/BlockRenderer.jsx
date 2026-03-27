@@ -34,21 +34,32 @@ export default function BlockRenderer({ block }) {
       );
 
     case 'image': {
+      const align = props.align || 'center';
+      const justifyContent =
+        align === 'right' ? 'flex-end' : align === 'center' ? 'center' : 'flex-start';
+
       const imgEl = props.src ? (
         <img
           src={props.src}
           alt={props.alt}
-          style={{ display: 'block', width: props.width, maxWidth: '100%' }}
+          style={{
+            display: 'block',
+            width: props.width,
+            maxWidth: '100%',
+            borderRadius: props.borderRadius ? `${props.borderRadius}px` : undefined,
+            objectFit: props.objectFit || undefined,
+          }}
         />
       ) : (
         <div className="image-placeholder">
           <span>Añade una URL de imagen en las propiedades</span>
         </div>
       );
+
       return (
-        <div style={{ textAlign: props.align || 'center' }}>
+        <div style={{ display: 'flex', justifyContent }}>
           {props.linkUrl ? (
-            <a href={props.linkUrl} style={{ display: 'inline-block' }}>
+            <a href={props.linkUrl} style={{ display: 'block' }}>
               {imgEl}
             </a>
           ) : (
