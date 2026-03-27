@@ -13,6 +13,9 @@ export default function SortableBlock({ block, isSelected, onSelect, onDelete })
     isDragging,
   } = useSortable({ id: block.id });
 
+  const bg = block.props.backgroundColor;
+  const bgStyle = bg && bg !== 'transparent' ? { backgroundColor: bg } : {};
+
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -35,7 +38,7 @@ export default function SortableBlock({ block, isSelected, onSelect, onDelete })
         <GripVertical size={16} />
       </div>
 
-      <div className="block-content">
+      <div className="block-content" style={bgStyle}>
         <BlockRenderer block={block} />
       </div>
 

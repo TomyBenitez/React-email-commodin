@@ -104,10 +104,11 @@
   background: #fff;
   width: 600px;
   min-height: 480px;
-  padding: 24px;
+  padding: 0;
   border-radius: 4px;
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.1);
   transition: outline 0.1s;
+  overflow: hidden;
 }
 
 .canvas-over {
@@ -132,20 +133,26 @@
 /* ── Block wrapper ───────────────────────────────────────── */
 .block-wrapper {
   position: relative;
-  border: 2px solid transparent;
-  border-radius: 4px;
-  padding: 10px 36px;
-  margin-bottom: 2px;
+  outline: 2px solid transparent;
+  outline-offset: -2px;
+  border-radius: 0;
+  padding: 0;
+  margin-bottom: 0;
   cursor: pointer;
-  transition: border-color 0.12s;
+  transition: outline-color 0.12s;
+  overflow: hidden;
+}
+
+.block-content {
+  padding: 10px 36px;
 }
 
 .block-wrapper:hover {
-  border-color: #c7d2fe;
+  outline-color: #c7d2fe;
 }
 
 .block-selected {
-  border-color: #4f46e5 !important;
+  outline-color: #4f46e5 !important;
 }
 
 .block-drag-handle {
@@ -160,6 +167,7 @@
   line-height: 1;
   opacity: 0;
   transition: opacity 0.12s;
+  z-index: 1;
 }
 
 .block-wrapper:hover .block-drag-handle,
@@ -185,6 +193,7 @@
   border-radius: 4px;
   opacity: 0;
   transition: opacity 0.12s, background 0.12s, color 0.12s;
+  z-index: 1;
 }
 
 .block-wrapper:hover .block-delete,

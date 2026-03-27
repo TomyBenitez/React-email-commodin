@@ -24,8 +24,6 @@ export default function BlockRenderer({ block }) {
             lineHeight: props.lineHeight,
             margin: 0,
             padding: props.padding || 0,
-            backgroundColor:
-              props.backgroundColor === 'transparent' ? undefined : props.backgroundColor,
             whiteSpace: 'pre-wrap',
           }}
         >
@@ -75,7 +73,7 @@ export default function BlockRenderer({ block }) {
           <span
             style={{
               display: 'inline-block',
-              backgroundColor: props.backgroundColor,
+              backgroundColor: props.buttonColor,
               color: props.color,
               borderRadius: props.borderRadius,
               padding: `${props.paddingV ?? 12}px ${props.paddingH ?? 24}px`,
@@ -105,22 +103,13 @@ export default function BlockRenderer({ block }) {
       );
 
     case 'spacer':
-      return (
-        <div
-          style={{
-            height: props.height,
-            backgroundColor:
-              props.backgroundColor === 'transparent' ? undefined : props.backgroundColor,
-          }}
-        />
-      );
+      return <div style={{ height: props.height }} />;
 
     case 'social': {
       const active = props.platforms.filter((p) => p.active);
       return (
         <div
           style={{
-            textAlign: props.align,
             display: 'flex',
             justifyContent:
               props.align === 'center'

@@ -19,6 +19,8 @@ const SOCIAL_ICONS = {
   WhatsApp: '✆',
 };
 
+const CONTENT_PADDING = '10px 24px';
+
 export default function EmailTemplate({ blocks }) {
   return (
     <Html>
@@ -37,7 +39,7 @@ export default function EmailTemplate({ blocks }) {
             backgroundColor: '#ffffff',
             maxWidth: '600px',
             margin: '0 auto',
-            padding: '24px',
+            padding: 0,
           }}
         >
           {blocks.map((block) => (
@@ -51,7 +53,24 @@ export default function EmailTemplate({ blocks }) {
 
 function BlockToEmail({ block }) {
   const { type, props } = block;
+  const bg =
+    props.backgroundColor && props.backgroundColor !== 'transparent'
+      ? props.backgroundColor
+      : undefined;
 
+  const content = renderBlockContent(type, props);
+
+  // Skip blocks with no content AND no background
+  if (!content && !bg) return null;
+
+  return (
+    <div style={{ backgroundColor: bg || undefined, width: '100%' }}>
+      {content}
+    </div>
+  );
+}
+
+function renderBlockContent(type, props) {
   switch (type) {
     case 'heading':
     case 'text':
@@ -64,10 +83,10 @@ function BlockToEmail({ block }) {
             fontWeight: props.fontWeight,
             fontFamily: props.fontFamily || 'Arial, sans-serif',
             lineHeight: String(props.lineHeight ?? 1.6),
-            margin: '0 0 16px',
-            padding: props.padding ? String(props.padding) + 'px' : '0',
-            backgroundColor:
-              props.backgroundColor === 'transparent' ? undefined : props.backgroundColor,
+            margin: 0,
+            padding: props.padding
+              ? `${props.padding}px 24px`
+              : CONTENT_PADDING,
           }}
         >
           {props.content}
@@ -75,38 +94,41 @@ function BlockToEmail({ block }) {
       );
 
     case 'image': {
-      const imgEl = props.src ? (
+      if (!props.src) return null;
+      const align = props.align || 'center';
+      const justifyContent =
+        align === 'right' ? 'flex-end' : align === 'center' ? 'center' : 'flex-start';
+      const imgEl = (
         <Img
           src={props.src}
           alt={props.alt}
           width={props.width}
-          style={{ display: 'block', margin: '0 auto 16px' }}
+          style={{
+            display: 'block',
+            borderRadius: props.borderRadius ? `${props.borderRadius}px` : undefined,
+          }}
         />
-      ) : null;
-      if (!imgEl) return null;
-      if (props.linkUrl) {
-        return (
-          <div style={{ textAlign: props.align || 'center', marginBottom: 16 }}>
+      );
+      return (
+        <div style={{ display: 'flex', justifyContent, padding: CONTENT_PADDING }}>
+          {props.linkUrl ? (
             <a href={props.linkUrl} style={{ display: 'inline-block' }}>
               {imgEl}
             </a>
-          </div>
-        );
-      }
-      return (
-        <div style={{ textAlign: props.align || 'center', marginBottom: 16 }}>
-          {imgEl}
+          ) : (
+            imgEl
+          )}
         </div>
       );
     }
 
     case 'button':
       return (
-        <div style={{ textAlign: props.align, margin: '0 0 16px' }}>
+        <div style={{ textAlign: props.align, padding: CONTENT_PADDING }}>
           <Button
             href={props.href}
             style={{
-              backgroundColor: props.backgroundColor,
+              backgroundColor: props.buttonColor,
               color: props.color,
               borderRadius: props.borderRadius,
               padding: `${props.paddingV ?? 12}px ${props.paddingH ?? 24}px`,
@@ -126,15 +148,15 @@ function BlockToEmail({ block }) {
 
     case 'divider':
       return (
-        <Hr
-          style={{
-            borderColor: props.borderColor,
-            borderStyle: props.borderStyle ?? 'solid',
-            borderTopWidth: props.borderWidth ?? 1,
-            marginTop: props.marginTop,
-            marginBottom: props.marginBottom,
-          }}
-        />
+        <div style={{ padding: `${props.marginTop ?? 16}px 0 ${props.marginBottom ?? 16}px` }}>
+          <Hr
+            style={{
+              border: 'none',
+              borderTop: `${props.borderWidth ?? 1}px ${props.borderStyle ?? 'solid'} ${props.borderColor}`,
+              margin: 0,
+            }}
+          />
+        </div>
       );
 
     case 'spacer':
@@ -144,20 +166,10 @@ function BlockToEmail({ block }) {
             height: props.height,
             fontSize: 0,
             lineHeight: 0,
-            backgroundColor:
-              props.backgroundColor === 'transparent' ? undefined : props.backgroundColor,
           }}
         >
           &nbsp;
         </div>
-      );
-
-    case 'html':
-      return (
-        <div
-          dangerouslySetInnerHTML={{ __html: props.code }}
-          style={{ marginBottom: 16 }}
-        />
       );
 
     case 'social': {
@@ -169,7 +181,7 @@ function BlockToEmail({ block }) {
           width="100%"
           cellPadding={0}
           cellSpacing={0}
-          style={{ marginBottom: 16 }}
+          style={{ padding: CONTENT_PADDING }}
         >
           <tbody>
             <tr>
@@ -215,7 +227,7 @@ function BlockToEmail({ block }) {
     }
 
     case 'columns': {
-      const { columns, gap, backgroundColor, padding } = props;
+      const { columns, gap, backgroundColor, padding, verticalAlign } = props;
       const colCount = columns.length;
       if (colCount === 0) return null;
       const colPct = Math.floor(100 / colCount);
@@ -225,7 +237,6 @@ function BlockToEmail({ block }) {
           cellPadding={0}
           cellSpacing={0}
           style={{
-            marginBottom: 16,
             backgroundColor:
               backgroundColor === 'transparent' ? undefined : backgroundColor,
           }}
@@ -237,11 +248,19 @@ function BlockToEmail({ block }) {
                   key={i}
                   width={`${colPct}%`}
                   style={{
-                    verticalAlign: props.verticalAlign === 'center' ? 'middle' : props.verticalAlign === 'bottom' ? 'bottom' : 'top',
-                    paddingLeft: i > 0 ? Math.floor((gap ?? 16) / 2) : (padding ?? 0),
-                    paddingRight: i < colCount - 1 ? Math.floor((gap ?? 16) / 2) : (padding ?? 0),
-                    paddingTop: padding ?? 0,
-                    paddingBottom: padding ?? 0,
+                    verticalAlign:
+                      verticalAlign === 'center'
+                        ? 'middle'
+                        : verticalAlign === 'bottom'
+                        ? 'bottom'
+                        : 'top',
+                    paddingLeft: i > 0 ? Math.floor((gap ?? 16) / 2) : (padding ?? 24),
+                    paddingRight:
+                      i < colCount - 1
+                        ? Math.floor((gap ?? 16) / 2)
+                        : (padding ?? 24),
+                    paddingTop: padding ?? 10,
+                    paddingBottom: padding ?? 10,
                   }}
                 >
                   {col.blocks.map((subBlock) => (
