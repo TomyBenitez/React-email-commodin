@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//d/Instituto-Tomy y Proyectos/Commodin/Html-Editor/**)"
+    ]
+  }
+}
