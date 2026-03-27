@@ -1,5 +1,7 @@
 import { useState } from 'react';
+import { AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
 import { SUB_BLOCK_TYPES, createSubBlock } from '../utils/blockDefaults';
+import GalleryModal from './GalleryModal';
 
 const BLOCK_LABELS = {
   heading: 'Título',
@@ -155,56 +157,7 @@ function PropsForm({ block, onChange }) {
       );
 
     case 'image':
-      return (
-        <>
-          <Field label="URL de imagen">
-            <input
-              type="text"
-              className="prop-input"
-              value={props.src}
-              onChange={(e) => onChange({ src: e.target.value })}
-              placeholder="https://..."
-            />
-          </Field>
-          <Field label="URL de enlace (opcional)">
-            <input
-              type="text"
-              className="prop-input"
-              value={props.linkUrl}
-              onChange={(e) => onChange({ linkUrl: e.target.value })}
-              placeholder="https://..."
-            />
-          </Field>
-          <Field label="Texto alternativo">
-            <input
-              type="text"
-              className="prop-input"
-              value={props.alt}
-              onChange={(e) => onChange({ alt: e.target.value })}
-            />
-          </Field>
-          <Field label="Ancho">
-            <input
-              type="text"
-              className="prop-input"
-              value={props.width}
-              onChange={(e) => onChange({ width: e.target.value })}
-              placeholder="100% o 300px"
-            />
-          </Field>
-          <Field label="Alineación">
-            <select
-              className="prop-select"
-              value={props.align}
-              onChange={(e) => onChange({ align: e.target.value })}
-            >
-              <option value="left">Izquierda</option>
-              <option value="center">Centro</option>
-              <option value="right">Derecha</option>
-            </select>
-          </Field>
-        </>
-      );
+      return <ImageForm props={props} onChange={onChange} />;
 
     case 'button':
       return (
@@ -424,6 +377,121 @@ function PropsForm({ block, onChange }) {
     default:
       return null;
   }
+}
+
+// ── Image form ───────────────────────────────────────────────────────────────
+
+const ALIGN_OPTIONS = [
+  { value: 'left',   Icon: AlignLeft },
+  { value: 'center', Icon: AlignCenter },
+  { value: 'right',  Icon: AlignRight },
+];
+
+function ImageForm({ props, onChange }) {
+  const [galleryOpen, setGalleryOpen] = useState(false);
+
+  const widthPercent = (() => {
+    const w = String(props.width ?? '100%');
+    if (w.endsWith('%')) return parseInt(w, 10) || 100;
+    return 100;
+  })();
+
+  return (
+    <>
+      <Field label="URL de imagen">
+        <input
+          type="text"
+          className="prop-input"
+          value={props.src}
+          onChange={(e) => onChange({ src: e.target.value })}
+          placeholder="https://..."
+        />
+      </Field>
+      <button className="btn-gallery" onClick={() => setGalleryOpen(true)}>
+        Elegir de galería
+      </button>
+
+      <Field label={`Tamaño — ${widthPercent}%`}>
+        <input
+          type="range"
+          className="prop-range"
+          min="10"
+          max="100"
+          value={widthPercent}
+          onChange={(e) => onChange({ width: e.target.value + '%' })}
+        />
+      </Field>
+
+      <Field label="Alineación">
+        <div className="align-buttons">
+          {ALIGN_OPTIONS.map(({ value, Icon }) => (
+            <button
+              key={value}
+              className={`align-btn ${props.align === value ? 'align-btn-active' : ''}`}
+              onClick={() => onChange({ align: value })}
+            >
+              <Icon size={15} />
+            </button>
+          ))}
+        </div>
+      </Field>
+
+      <Field label={`Borde redondeado — ${props.borderRadius ?? 0}px`}>
+        <input
+          type="range"
+          className="prop-range"
+          min="0"
+          max="50"
+          value={props.borderRadius ?? 0}
+          onChange={(e) => onChange({ borderRadius: Number(e.target.value) })}
+        />
+      </Field>
+
+      <Field label="Modo de ajuste">
+        <div className="fit-buttons">
+          {[
+            { value: 'fill',       label: 'Rellenar' },
+            { value: 'contain',    label: 'Contener' },
+            { value: 'cover',      label: 'Cubrir' },
+            { value: 'scale-down', label: 'Reducir' },
+          ].map(({ value, label }) => (
+            <button
+              key={value}
+              className={`fit-btn ${(props.objectFit ?? 'fill') === value ? 'fit-btn-active' : ''}`}
+              onClick={() => onChange({ objectFit: value })}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </Field>
+
+      <Field label="URL de enlace (opcional)">
+        <input
+          type="text"
+          className="prop-input"
+          value={props.linkUrl}
+          onChange={(e) => onChange({ linkUrl: e.target.value })}
+          placeholder="https://..."
+        />
+      </Field>
+      <Field label="Texto alternativo">
+        <input
+          type="text"
+          className="prop-input"
+          value={props.alt}
+          onChange={(e) => onChange({ alt: e.target.value })}
+        />
+      </Field>
+
+      {galleryOpen && (
+        <GalleryModal
+          onSelect={(url) => onChange({ src: url })}
+          onClose={() => setGalleryOpen(false)}
+        />
+      )}
+    </>
+  );
 }
 
 // ── Social form ──────────────────────────────────────────────────────────────
