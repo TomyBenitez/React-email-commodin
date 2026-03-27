@@ -50,6 +50,27 @@ function Field({ label, children }) {
   );
 }
 
+function BgField({ value, onChange }) {
+  return (
+    <Field label="Color de fondo del bloque">
+      <div className="prop-color-row">
+        <input
+          type="color"
+          className="prop-color"
+          value={value === 'transparent' ? '#ffffff' : value}
+          onChange={(e) => onChange({ backgroundColor: e.target.value })}
+        />
+        <button
+          className="prop-btn-clear"
+          onClick={() => onChange({ backgroundColor: 'transparent' })}
+        >
+          Sin fondo
+        </button>
+      </div>
+    </Field>
+  );
+}
+
 function PropsForm({ block, onChange }) {
   const { type, props } = block;
 
@@ -84,22 +105,7 @@ function PropsForm({ block, onChange }) {
               onChange={(e) => onChange({ color: e.target.value })}
             />
           </Field>
-          <Field label="Color de fondo">
-            <div className="prop-color-row">
-              <input
-                type="color"
-                className="prop-color"
-                value={props.backgroundColor === 'transparent' ? '#ffffff' : props.backgroundColor}
-                onChange={(e) => onChange({ backgroundColor: e.target.value })}
-              />
-              <button
-                className="prop-btn-clear"
-                onClick={() => onChange({ backgroundColor: 'transparent' })}
-              >
-                Sin fondo
-              </button>
-            </div>
-          </Field>
+          <BgField value={props.backgroundColor} onChange={onChange} />
           <Field label="Alineación">
             <select
               className="prop-select"
@@ -178,12 +184,12 @@ function PropsForm({ block, onChange }) {
               onChange={(e) => onChange({ href: e.target.value })}
             />
           </Field>
-          <Field label="Color de fondo">
+          <Field label="Color del botón">
             <input
               type="color"
               className="prop-color"
-              value={props.backgroundColor}
-              onChange={(e) => onChange({ backgroundColor: e.target.value })}
+              value={props.buttonColor ?? '#0066cc'}
+              onChange={(e) => onChange({ buttonColor: e.target.value })}
             />
           </Field>
           <Field label="Color de texto">
@@ -278,6 +284,7 @@ function PropsForm({ block, onChange }) {
               </Field>
             </>
           )}
+          <BgField value={props.backgroundColor ?? 'transparent'} onChange={onChange} />
         </>
       );
 
@@ -333,6 +340,7 @@ function PropsForm({ block, onChange }) {
               max={80}
             />
           </Field>
+          <BgField value={props.backgroundColor ?? 'transparent'} onChange={onChange} />
         </>
       );
 
@@ -349,22 +357,7 @@ function PropsForm({ block, onChange }) {
               max={400}
             />
           </Field>
-          <Field label="Color de fondo">
-            <div className="prop-color-row">
-              <input
-                type="color"
-                className="prop-color"
-                value={props.backgroundColor === 'transparent' ? '#ffffff' : props.backgroundColor}
-                onChange={(e) => onChange({ backgroundColor: e.target.value })}
-              />
-              <button
-                className="prop-btn-clear"
-                onClick={() => onChange({ backgroundColor: 'transparent' })}
-              >
-                Sin fondo
-              </button>
-            </div>
-          </Field>
+          <BgField value={props.backgroundColor ?? 'transparent'} onChange={onChange} />
         </>
       );
 
@@ -484,6 +477,8 @@ function ImageForm({ props, onChange }) {
         />
       </Field>
 
+      <BgField value={props.backgroundColor ?? 'transparent'} onChange={onChange} />
+
       {galleryOpen && (
         <GalleryModal
           onSelect={(url) => onChange({ src: url })}
@@ -587,6 +582,7 @@ function SocialForm({ props, onChange }) {
           max={40}
         />
       </Field>
+      <BgField value={props.backgroundColor ?? 'transparent'} onChange={onChange} />
     </>
   );
 }

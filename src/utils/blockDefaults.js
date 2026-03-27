@@ -29,11 +29,12 @@ const DEFAULT_PROPS = {
     linkUrl: '',
     borderRadius: 0,
     objectFit: 'fill',
+    backgroundColor: 'transparent',
   },
   button: {
     text: 'Hacer click aquí',
     href: '#',
-    backgroundColor: '#0066cc',
+    buttonColor: '#0066cc',
     color: '#ffffff',
     borderRadius: 6,
     align: 'center',
@@ -43,6 +44,7 @@ const DEFAULT_PROPS = {
     borderWidth: 0,
     borderColor: '#0066cc',
     borderStyle: 'solid',
+    backgroundColor: 'transparent',
   },
   divider: {
     borderColor: '#dddddd',
@@ -50,6 +52,7 @@ const DEFAULT_PROPS = {
     borderWidth: 1,
     marginTop: 16,
     marginBottom: 16,
+    backgroundColor: 'transparent',
   },
   spacer: {
     height: 32,
@@ -70,6 +73,7 @@ const DEFAULT_PROPS = {
     iconColor: '#ffffff',
     gap: 8,
     borderRadius: 6,
+    backgroundColor: 'transparent',
   },
   columns: {
     columnCount: 2,

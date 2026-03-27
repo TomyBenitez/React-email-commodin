@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
 import { X, Loader2, Images } from 'lucide-react';
 
-const GALLERY_API = import.meta.env.VITE_GALLERY_API;
+const GALLERY_API = import.meta.env.DEV
+  ? '/gallery-proxy'
+  : import.meta.env.VITE_GALLERY_API;
+
 const communityId = new URLSearchParams(window.location.search).get('communityId') ?? '';
 
 export default function GalleryModal({ onSelect, onClose }) {
