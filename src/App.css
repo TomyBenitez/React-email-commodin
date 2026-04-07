@@ -356,6 +356,20 @@
   text-align: center;
   color: #bbb;
   font-size: 11px;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.column-empty-placeholder.column-over {
+  border-color: #4f86f7;
+  background: rgba(79, 134, 247, 0.06);
+  color: #4f86f7;
+}
+
+.column-over {
+  outline: 2px dashed #4f86f7;
+  outline-offset: 2px;
+  border-radius: 4px;
+  background: rgba(79, 134, 247, 0.04);
 }
 
 .html-block-preview {
@@ -506,6 +520,39 @@
 .col-subblock-delete:hover {
   color: #ef4444;
   background: #fee2e2;
+}
+
+/* ── Sortable sub-blocks inside columns ──────────────────── */
+.sub-block-wrapper {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+}
+
+.sub-block-wrapper:hover .sub-block-drag-handle {
+  opacity: 1;
+}
+
+.sub-block-drag-handle {
+  position: absolute;
+  left: -18px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0;
+  cursor: grab;
+  color: #aaa;
+  padding: 2px;
+  transition: opacity 0.15s, color 0.15s;
+  z-index: 1;
+}
+
+.sub-block-drag-handle:hover {
+  color: #555;
+}
+
+.sub-block-content {
+  flex: 1;
+  min-width: 0;
 }
 
 .col-add-btn {

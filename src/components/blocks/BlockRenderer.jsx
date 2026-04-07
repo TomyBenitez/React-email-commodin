@@ -1,3 +1,37 @@
+import { useDroppable } from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import SortableSubBlock from '../SortableSubBlock';
+
+function ColumnDropZone({ blockId, colIdx, col }) {
+  const { setNodeRef, isOver } = useDroppable({ id: `col::${blockId}::${colIdx}` });
+  return (
+    <div ref={setNodeRef} style={{ flex: 1, minWidth: 0 }}>
+      {col.blocks.length === 0 ? (
+        <div className={`column-empty-placeholder${isOver ? ' column-over' : ''}`}>
+          <span>Columna {colIdx + 1} vacía</span>
+        </div>
+      ) : (
+        <SortableContext
+          items={col.blocks.map((b) => b.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          <div className={isOver ? 'column-over' : undefined}>
+            {col.blocks.map((subBlock) => (
+              <div key={subBlock.id} style={{ marginBottom: 8 }}>
+                <SortableSubBlock
+                  subBlock={subBlock}
+                  parentBlockId={blockId}
+                  colIdx={colIdx}
+                />
+              </div>
+            ))}
+          </div>
+        </SortableContext>
+      )}
+    </div>
+  );
+}
+
 const SOCIAL_ICONS = {
   Facebook: 'f',
   Instagram: '◉',
@@ -25,6 +59,8 @@ export default function BlockRenderer({ block }) {
             margin: 0,
             padding: props.padding || 0,
             whiteSpace: 'pre-wrap',
+            overflowWrap: 'break-word',
+            wordBreak: 'break-word',
           }}
         >
           {props.content || (type === 'heading' ? 'Título...' : 'Texto...')}
@@ -173,19 +209,7 @@ export default function BlockRenderer({ block }) {
           }}
         >
           {columns.map((col, i) => (
-            <div key={i} style={{ flex: 1, minWidth: 0 }}>
-              {col.blocks.length === 0 ? (
-                <div className="column-empty-placeholder">
-                  <span>Columna {i + 1} vacía</span>
-                </div>
-              ) : (
-                col.blocks.map((subBlock) => (
-                  <div key={subBlock.id} style={{ marginBottom: 8 }}>
-                    <BlockRenderer block={subBlock} />
-                  </div>
-                ))
-              )}
-            </div>
+            <ColumnDropZone key={i} blockId={block.id} colIdx={i} col={col} />
           ))}
         </div>
       );

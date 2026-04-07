@@ -12,7 +12,7 @@ import { arrayMove } from '@dnd-kit/sortable';
 import Sidebar from './components/Sidebar';
 import Canvas from './components/Canvas';
 import PropertiesPanel from './components/PropertiesPanel';
-import { createBlock } from './utils/blockDefaults';
+import { createBlock, createSubBlock } from './utils/blockDefaults';
 import { renderEmailHTML } from './utils/renderEmail';
 import './App.css';
 
@@ -37,7 +37,57 @@ export default function App() {
 
     if (!over) return;
 
-    // Drop from sidebar → create new block
+    const overId = String(over.id);
+
+    // Reorder sub-blocks within the same column
+    if (
+      active.data.current?.origin === 'column' &&
+      over.data.current?.origin === 'column' &&
+      active.data.current.parentBlockId === over.data.current.parentBlockId &&
+      active.data.current.colIdx === over.data.current.colIdx
+    ) {
+      const { parentBlockId, colIdx } = active.data.current;
+      setBlocks((prev) =>
+        prev.map((b) => {
+          if (b.id !== parentBlockId) return b;
+          const col = b.props.columns[colIdx];
+          const oldIndex = col.blocks.findIndex((s) => s.id === active.id);
+          const newIndex = col.blocks.findIndex((s) => s.id === over.id);
+          if (oldIndex === -1 || newIndex === -1 || oldIndex === newIndex) return b;
+          const newCols = b.props.columns.map((c, i) => {
+            if (i !== colIdx) return c;
+            return { ...c, blocks: arrayMove(c.blocks, oldIndex, newIndex) };
+          });
+          return { ...b, props: { ...b.props, columns: newCols } };
+        })
+      );
+      return;
+    }
+
+    // Drop into a column zone
+    if (overId.startsWith('col::')) {
+      if (active.data.current?.origin === 'sidebar') {
+        const { blockType } = active.data.current;
+        if (blockType === 'columns') return; // no nested columns
+        const [, blockId, colIdxStr] = overId.split('::');
+        const colIdx = parseInt(colIdxStr, 10);
+        const newSubBlock = createSubBlock(blockType);
+        setBlocks((prev) =>
+          prev.map((b) => {
+            if (b.id !== blockId) return b;
+            const newCols = b.props.columns.map((col, i) => {
+              if (i !== colIdx) return col;
+              return { ...col, blocks: [...col.blocks, newSubBlock] };
+            });
+            return { ...b, props: { ...b.props, columns: newCols } };
+          })
+        );
+        setSelectedId(blockId);
+      }
+      return;
+    }
+
+    // Drop from sidebar → create new block on canvas
     if (active.data.current?.origin === 'sidebar') {
       const { blockType, config, makeConfig } = active.data.current;
       const resolvedConfig = makeConfig ? makeConfig() : (config || {});
@@ -81,8 +131,8 @@ export default function App() {
     if (selectedId === id) setSelectedId(null);
   }
 
-  function handleExportHTML() {
-    const html = renderEmailHTML(blocks);
+  async function handleExportHTML() {
+    const html = await renderEmailHTML(blocks);
     navigator.clipboard.writeText(html).then(() => {
       alert('HTML copiado al portapapeles.');
     });
