@@ -19,7 +19,6 @@ const SOCIAL_ICONS = {
   WhatsApp: '✆',
 };
 
-const CONTENT_PADDING = '10px 24px';
 
 export default function EmailTemplate({ blocks }) {
   return (
@@ -51,14 +50,14 @@ export default function EmailTemplate({ blocks }) {
   );
 }
 
-function BlockToEmail({ block }) {
+function BlockToEmail({ block, insideColumn = false }) {
   const { type, props } = block;
   const bg =
     props.backgroundColor && props.backgroundColor !== 'transparent'
       ? props.backgroundColor
       : undefined;
 
-  const content = renderBlockContent(type, props);
+  const content = renderBlockContent(type, props, insideColumn);
 
   // Skip blocks with no content AND no background
   if (!content && !bg) return null;
@@ -70,7 +69,11 @@ function BlockToEmail({ block }) {
   );
 }
 
-function renderBlockContent(type, props) {
+function renderBlockContent(type, props, insideColumn = false) {
+  const hPad = insideColumn ? 0 : 24;
+  const vPad = insideColumn ? 4 : 10;
+  const blockPadding = `${vPad}px ${hPad}px`;
+
   switch (type) {
     case 'heading':
     case 'text':
@@ -84,9 +87,7 @@ function renderBlockContent(type, props) {
             fontFamily: props.fontFamily || 'Arial, sans-serif',
             lineHeight: String(props.lineHeight ?? 1.6),
             margin: 0,
-            padding: props.padding
-              ? `${props.padding}px 24px`
-              : CONTENT_PADDING,
+            padding: props.padding ? `${props.padding}px ${hPad}px` : blockPadding,
           }}
         >
           {props.content}
@@ -96,35 +97,41 @@ function renderBlockContent(type, props) {
     case 'image': {
       if (!props.src) return null;
       const align = props.align || 'center';
-      const justifyContent =
-        align === 'right' ? 'flex-end' : align === 'center' ? 'center' : 'flex-start';
+      const tableAlign = align === 'right' ? 'right' : align === 'center' ? 'center' : 'left';
       const imgEl = (
         <Img
           src={props.src}
           alt={props.alt}
-          width={props.width}
+          width={insideColumn ? '100%' : props.width}
           style={{
             display: 'block',
+            maxWidth: '100%',
             borderRadius: props.borderRadius ? `${props.borderRadius}px` : undefined,
           }}
         />
       );
       return (
-        <div style={{ display: 'flex', justifyContent, padding: CONTENT_PADDING }}>
-          {props.linkUrl ? (
-            <a href={props.linkUrl} style={{ display: 'inline-block' }}>
-              {imgEl}
-            </a>
-          ) : (
-            imgEl
-          )}
-        </div>
+        <table width="100%" cellPadding={0} cellSpacing={0} style={{ padding: blockPadding }}>
+          <tbody>
+            <tr>
+              <td align={tableAlign}>
+                {props.linkUrl ? (
+                  <a href={props.linkUrl} style={{ display: 'inline-block' }}>
+                    {imgEl}
+                  </a>
+                ) : (
+                  imgEl
+                )}
+              </td>
+            </tr>
+          </tbody>
+        </table>
       );
     }
 
     case 'button':
       return (
-        <div style={{ textAlign: props.align, padding: CONTENT_PADDING }}>
+        <div style={{ textAlign: props.align, padding: blockPadding }}>
           <Button
             href={props.href}
             style={{
@@ -181,7 +188,7 @@ function renderBlockContent(type, props) {
           width="100%"
           cellPadding={0}
           cellSpacing={0}
-          style={{ padding: CONTENT_PADDING }}
+          style={{ padding: blockPadding }}
         >
           <tbody>
             <tr>
@@ -254,17 +261,14 @@ function renderBlockContent(type, props) {
                         : verticalAlign === 'bottom'
                         ? 'bottom'
                         : 'top',
-                    paddingLeft: i > 0 ? Math.floor((gap ?? 16) / 2) : (padding ?? 24),
-                    paddingRight:
-                      i < colCount - 1
-                        ? Math.floor((gap ?? 16) / 2)
-                        : (padding ?? 24),
-                    paddingTop: padding ?? 10,
-                    paddingBottom: padding ?? 10,
+                    paddingLeft: i === 0 ? (padding ?? 16) : Math.floor((gap ?? 16) / 2),
+                    paddingRight: i === colCount - 1 ? (padding ?? 16) : Math.floor((gap ?? 16) / 2),
+                    paddingTop: padding ?? 8,
+                    paddingBottom: padding ?? 8,
                   }}
                 >
                   {col.blocks.map((subBlock) => (
-                    <BlockToEmail key={subBlock.id} block={subBlock} />
+                    <BlockToEmail key={subBlock.id} block={subBlock} insideColumn />
                   ))}
                 </td>
               ))}
